@@ -26,6 +26,8 @@ module DelayedJobCelluloid
         Celluloid.register_shutdown
         Celluloid.start
         DelayedJobCelluloid.logger = Logger.new(@options[:log_file])
+        Delayed::Worker.logger = DelayedJobCelluloid.logger
+        Delayed::Worker.tagged_logger = ActiveSupport::TaggedLogging.new(DelayedJobCelluloid.logger)
         logger.formatter = proc do |severity, datetime, progname, msg|
           "#{datetime}: #{msg}\n"
         end
