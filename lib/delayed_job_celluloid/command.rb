@@ -156,8 +156,14 @@ module DelayedJobCelluloid
         opts.on('--queues=queues', "Specify which queue DJ must look up for jobs") do |queues|
           @options[:queues] = queues.split(',')
         end
+        opts.on('--priority-queues=queues', 'Specify which queue DJ must look up for URGENT jobs') do |priority_queues|
+          @options[:priority_queues] = priority_queues.split(',')
+        end
         opts.on('--queue=queue', "Specify which queue DJ must look up for jobs") do |queue|
           @options[:queues] = queue.split(',')
+        end
+        opts.on('--priority-queue=queue', 'Specify which queue DJ must look up for URGENT jobs') do |priority_queue|
+          @options[:priority_queues] = priority_queue.split(',')
         end
         opts.on('--pool=queue1[,queue2][:worker_count]', 'Specify queues and number of workers for a worker pool') do |pool|
           parse_worker_pool(pool)
