@@ -27,7 +27,10 @@ module DelayedJobCelluloid
     end
     
     def start
-      @ready.each_with_index do |worker, index|
+      # The @ready list will be updated by workers, so clone it to be
+      # thread-safe
+      ready_clone = @ready.clone
+      ready_clone.each_with_index do |worker, index|
         worker.name = "delayed_job.#{index}"
         worker.async.start 
       end
@@ -37,7 +40,8 @@ module DelayedJobCelluloid
       @done = true
             
       info "Shutting down #{@ready.size} idle workers"
-      @ready.each do |worker|
+      ready_clone = @ready.clone
+      ready_clone.each do |worker|
         worker.terminate if worker.alive?
       end
       @ready.clear
