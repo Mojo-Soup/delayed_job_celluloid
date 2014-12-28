@@ -13,7 +13,7 @@ module DelayedJobCelluloid
     attr_accessor :worker_count
 
     def logger
-      DelayedJobCelluloid.logger
+      Thread.current[:cell_logger]
     end
 
     def initialize(args)
@@ -22,22 +22,34 @@ module DelayedJobCelluloid
 
     def daemonize
 
+      before_fork
       Daemons.run_proc(@options[:worker_name], :dir => @options[:pid_dir], :dir_mode => :normal, :monitor => @monitor,
                                                                                             :ARGV => @args) do |*_args|
         Celluloid.register_shutdown
         Celluloid.start
-        DelayedJobCelluloid.logger = Logger.new(@options[:log_file])
-        Delayed::Worker.logger = DelayedJobCelluloid.logger
-        Delayed::Worker.tagged_logger = ActiveSupport::TaggedLogging.new(DelayedJobCelluloid.logger)
-        logger.formatter = proc do |severity, datetime, progname, msg|
-          "#{datetime}: #{msg}\n"
-        end
 
-        logger.info 'Celluloid daemon started'
         $0 = File.join(@options[:prefix], 'delayed_job_celluloid') if @options[:prefix]
         launch_celluloid(false)
       end
     end
+
+    def before_fork
+      @files_to_reopen = []
+        ObjectSpace.each_object(File) do |file|
+        @files_to_reopen << file unless file.closed?
+      end
+    end
+
+    def after_fork
+      @files_to_reopen.each do |file|
+        begin
+          file.reopen file.path, "a+"
+          file.sync = true
+        rescue ::Exception
+        end
+      end
+    end
+
 
     # Run Celluloid in the foreground
     def run
@@ -65,6 +77,21 @@ module DelayedJobCelluloid
       @launcher = Launcher.new(@options, @worker_count)
 
       unless in_foreground
+        after_fork
+
+        # Use thread-safe logging
+        Thread.current[:cell_logger] = Logger.new(@options[:log_file])
+        Delayed::Worker.logger = Thread.current[:cell_logger]
+        SoupSync.logger = Thread.current[:cell_logger]
+        Delayed::Worker.tagged_logger = Thread.current[:soupsync_tagged_logger] =
+            ActiveSupport::TaggedLogging.new(Thread.current[:cell_logger])
+
+        logger.formatter = proc do |severity, datetime, progname, msg|
+          "#{datetime}: #{msg}\n"
+        end
+
+        logger.info 'Celluloid daemon started'
+
         # Daemonized - wait to receive a signal
         %w(INT TERM).each do |sig|
           trap sig do
@@ -97,8 +124,8 @@ module DelayedJobCelluloid
         exit(0)
 
       rescue => e
-        DelayedJobCelluloid.logger.info "Exception: #{e.message}"
-        DelayedJobCelluloid.logger.info Kernel.caller
+        logger.info "Exception: #{e.message}"
+        logger.info Kernel.caller
       end
     end
     
