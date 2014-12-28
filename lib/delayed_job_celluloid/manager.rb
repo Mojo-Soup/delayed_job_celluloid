@@ -1,4 +1,5 @@
 require_relative 'worker'
+require 'socket'
 
 module DelayedJobCelluloid
   class Manager
@@ -27,11 +28,13 @@ module DelayedJobCelluloid
     end
     
     def start
+      hostname = Socket.gethostname
+
       # The @ready list will be updated by workers, so clone it to be
       # thread-safe
       ready_clone = @ready.clone
       ready_clone.each_with_index do |worker, index|
-        worker.name = "delayed_job.#{index}"
+        worker.name = "dj.#{hostname}.#{index}"
         worker.async.start 
       end
     end
