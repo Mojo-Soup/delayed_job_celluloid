@@ -32,9 +32,10 @@ module DelayedJobCelluloid
 
       # The @ready list will be updated by workers, so clone it to be
       # thread-safe
+      name = @options[:worker_prefix] || 'dj'
       ready_clone = @ready.clone
       ready_clone.each_with_index do |worker, index|
-        worker.name = "dj.#{hostname}.#{index}"
+        worker.name = "#{name}.#{hostname}.#{index}"
         worker.async.start 
       end
     end

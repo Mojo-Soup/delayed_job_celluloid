@@ -171,6 +171,9 @@ module DelayedJobCelluloid
         opts.on('--worker-name=NAME', 'Specifies an alternate worker name') do |name|
           @options[:worker_name] = name
         end
+        opts.on('--worker-prefix=NAME', 'Specifies an alternate internal worker prefix (default is "dj") ') do |name|
+          @options[:worker_prefix] = name
+        end
         opts.on('--sleep-delay N', "Amount of time to sleep when no jobs are found") do |n|
           @options[:sleep_delay] = n.to_i
         end
