@@ -98,6 +98,8 @@ module DelayedJobCelluloid
             handle_signal(sig)
           end
         end
+      else
+        logger = Logger.new(@options[:log_file])
       end
 
       begin
