@@ -26,6 +26,9 @@ module DelayedJobCelluloid
       Daemons.run_proc(@options[:worker_name], :dir => @options[:pid_dir], :dir_mode => :normal, :monitor => @monitor,
                                                                                             :ARGV => @args) do |*_args|
         Celluloid.register_shutdown
+
+        # 'daemons' gem can cwd to '/' which breaks things like New Relic's newrelic.yml loading
+        Dir.chdir(Rails.root)
         Celluloid.start
 
         $0 = File.join(@options[:prefix], 'delayed_job_celluloid') if @options[:prefix]
