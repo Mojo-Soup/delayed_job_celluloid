@@ -13,6 +13,7 @@ module DelayedJobCelluloid
     attr_accessor :worker_count
 
     def logger
+      Thread.current[:cell_logger] ||= Logger.new('/tmp/celluloid.log')
       Thread.current[:cell_logger]
     end
 
@@ -102,12 +103,12 @@ module DelayedJobCelluloid
           end
         end
       else
-        logger = Logger.new(@options[:log_file])
+        Thread.current[:cell_logger] = Logger.new(@options[:log_file])
       end
 
       begin
 
-        logger.info 'Begin celluloid launcher'
+        #logger.info 'Begin celluloid launcher'
         @launcher.run
 
         if in_foreground
