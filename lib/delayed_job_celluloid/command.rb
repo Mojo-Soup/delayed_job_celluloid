@@ -195,6 +195,9 @@ module DelayedJobCelluloid
         opts.on('--priority-queues=queues', 'Specify which queue DJ must look up for URGENT jobs') do |priority_queues|
           @options[:priority_queues] = priority_queues.split(',')
         end
+        opts.on('--ignore-priority=sec', 'Specify how long to wait (seconds) before urgent jobs are done by any worker') do |ignore_priority|
+          @options[:ignore_priority] = ignore_priority.to_i
+        end
         opts.on('--queue=queue', "Specify which queue DJ must look up for jobs") do |queue|
           @options[:queues] = queue.split(',')
         end
