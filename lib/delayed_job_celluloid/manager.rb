@@ -74,7 +74,8 @@ module DelayedJobCelluloid
       @busy.delete(worker)
       unless stopped?
         worker = Worker.new_link(@options, current_actor)
-        worker.name = "restarted"
+        # Soup Mail: Removed this because we want the worker to have a unique name
+        #worker.name = "restarted"
         @ready << worker
         worker.async.start
       else
