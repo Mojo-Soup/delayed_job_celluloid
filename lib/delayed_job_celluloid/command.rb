@@ -196,7 +196,7 @@ module DelayedJobCelluloid
           @options[:priority_queues] = priority_queues.split(',')
         end
         opts.on('--ignore-priority=sec', 'Specify how long to wait (seconds) before urgent jobs are done by any worker') do |ignore_priority|
-          @options[:ignore_priority] = ignore_priority.to_i
+          @options[:ignore_priority] = ignore_priority.to_i.seconds
         end
         opts.on('--max-reschedule=count', 'Specify a maximum number of non-urgent jobs to reschedule at a time in a batch') do |count|
           @options[:max_reschedule] = count.to_i
