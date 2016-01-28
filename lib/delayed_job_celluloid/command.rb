@@ -90,9 +90,9 @@ module DelayedJobCelluloid
         Delayed::Worker.tagged_logger = Thread.current[:soupsync_tagged_logger] =
             ActiveSupport::TaggedLogging.new(Thread.current[:cell_logger])
 
-        logger.formatter = proc do |severity, datetime, progname, msg|
-          "#{datetime}: #{msg}\n"
-        end
+        # logger.formatter = proc do |severity, datetime, progname, msg|
+        #   "#{datetime}: #{msg}\n"
+        # end
 
         logger.info 'Celluloid daemon started'
 
