@@ -24,12 +24,14 @@ module DelayedJobCelluloid
     
     def start
       begin
-
-        # Use thread-safe logging
-        ::Thread.current[:logger] = ::Logger.new(@options[:log_file])
-        ::Thread.current[:id] = ::Thread.current.object_id % 10000
-
-        ::Thread.current[:tagged_logger] = ActiveSupport::TaggedLogging.new(::Thread.current[:logger])
+        if Delayed::Worker.queues.include? 'sync'
+          log_file = File.open(Rails.root.join('log', "#{Rails.env}_sync.log"), 'a')
+        else
+          log_file = File.open(Rails.root.join('log', "#{Rails.env}_jobs.log"), 'a')
+        end
+        log_file.sync = true
+        ::Thread.current[:logger] = ::Logger.new(log_file, ::Logger::Severity::INFO)
+        ::Thread.current[:tagged_logger] = ::ActiveSupport::TaggedLogging.new(::Thread.current[:logger])
 
         say "Starting job worker"
         @manager.async.real_thread(proxy_id, Thread.current)
