@@ -26,17 +26,10 @@ module DelayedJobCelluloid
       begin
 
         # Use thread-safe logging
-        ::Thread.current[:cell_logger] = ::Logger.new(@options[:log_file])
-        SoupSync.logger = ::Thread.current[:cell_logger]
+        ::Thread.current[:logger] = ::Logger.new(@options[:log_file])
         ::Thread.current[:id] = ::Thread.current.object_id % 10000
 
-        Delayed::Worker.logger = ::Thread.current[:cell_logger]
-        Delayed::Worker.tagged_logger = ::Thread.current[:soupsync_tagged_logger] =
-                                            ActiveSupport::TaggedLogging.new(::Thread.current[:cell_logger])
-
-        # logger.formatter = proc do |severity, datetime, progname, msg|
-        #   "#{datetime}: #{msg}\n"
-        # end
+        ::Thread.current[:tagged_logger] = ActiveSupport::TaggedLogging.new(::Thread.current[:logger])
 
         say "Starting job worker"
         @manager.async.real_thread(proxy_id, Thread.current)

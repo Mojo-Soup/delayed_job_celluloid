@@ -13,8 +13,8 @@ module DelayedJobCelluloid
     attr_accessor :worker_count
 
     def logger
-      Thread.current[:cell_logger] ||= Logger.new('/tmp/celluloid.log')
-      Thread.current[:cell_logger]
+      Thread.current[:logger] ||= Logger.new('/tmp/celluloid.log')
+      Thread.current[:logger]
     end
 
     def initialize(args)
@@ -84,11 +84,8 @@ module DelayedJobCelluloid
         after_fork
 
         # Use thread-safe logging
-        Thread.current[:cell_logger] = Logger.new(@options[:log_file])
-        Delayed::Worker.logger = Thread.current[:cell_logger]
-        SoupSync.logger = Thread.current[:cell_logger]
-        Delayed::Worker.tagged_logger = Thread.current[:soupsync_tagged_logger] =
-            ActiveSupport::TaggedLogging.new(Thread.current[:cell_logger])
+        ::Thread.current[:logger] = Logger.new(@options[:log_file])
+        ::Thread.current[:tagged_logger] = ActiveSupport::TaggedLogging.new(Thread.current[:logger])
 
         # logger.formatter = proc do |severity, datetime, progname, msg|
         #   "#{datetime}: #{msg}\n"
@@ -103,7 +100,7 @@ module DelayedJobCelluloid
           end
         end
       else
-        Thread.current[:cell_logger] = Logger.new(@options[:log_file])
+        Thread.current[:logger] = Logger.new(@options[:log_file])
       end
 
       begin

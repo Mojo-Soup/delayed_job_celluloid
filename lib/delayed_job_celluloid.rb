@@ -8,6 +8,3 @@ module DelayedJobCelluloid
     attr_accessor :logger
   end
 end
-
-DelayedJobCelluloid.logger = Logger.new(STDERR)
-Celluloid.logger = DelayedJobCelluloid.logger  
