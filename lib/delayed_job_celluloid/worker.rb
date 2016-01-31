@@ -32,6 +32,8 @@ module DelayedJobCelluloid
         log_file.sync = true
         ::Thread.current[:logger] = ::Logger.new(log_file, ::Logger::Severity::INFO)
         ::Thread.current[:tagged_logger] = ::ActiveSupport::TaggedLogging.new(::Thread.current[:logger])
+        ActiveRecord::Base.logger = ::Thread.current[:logger]
+        ActionMailer::Base.logger = ::Thread.current[:logger]
 
         say "Starting job worker"
         @manager.async.real_thread(proxy_id, Thread.current)
