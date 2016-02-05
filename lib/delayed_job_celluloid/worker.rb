@@ -26,8 +26,10 @@ module DelayedJobCelluloid
       begin
         if Delayed::Worker.queues.include? 'sync'
           log_file = File.open(Rails.root.join('log', "#{Rails.env}_sync.log"), 'a')
+          log_file.puts "Queues: #{Delayed::Worker.queues.inspect}"
         else
           log_file = File.open(Rails.root.join('log', "#{Rails.env}_jobs.log"), 'a')
+          log_file.puts "Queues: #{Delayed::Worker.queues.inspect}"
         end
         log_file.sync = true
         ::Thread.current[:logger] = ::Logger.new(log_file, ::Logger::Severity::INFO)
