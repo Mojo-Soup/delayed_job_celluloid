@@ -24,7 +24,11 @@ module DelayedJobCelluloid
     
     def start
       begin
-        if Delayed::Worker.queues.include? 'sync'
+        is_sync = false
+        Delayed::Worker.queues.each do |queue|
+          is_sync = true if queue.start_with? 'sync'
+        end
+        if is_sync
           log_file = File.open(Rails.root.join('log', "#{Rails.env}_sync.log"), 'a')
           log_file.puts "Queues: #{Delayed::Worker.queues.inspect}"
         else
